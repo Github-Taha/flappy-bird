@@ -1,0 +1,160 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Flappy Bird</title>
+        <style>
+            body{
+                background-color:black;
+            }
+            canvas{
+                position:relative;
+                top:100px;
+                left:100px;
+                background-color:white;
+                border:black 2px solid;
+            }
+            h1{
+                margin:0;
+                padding:0;
+                color:white;
+                text-align:center;
+                font-family:fantasy;
+            }
+            p{top:50px;color:white;position:absolute;margin:20px;}
+            h3{
+                color:white;
+                position:absolute;
+                margin:2px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>FLAPPY BIRD</h1>
+        <h3>Instructions:</h3>
+        <p>Press space key to jump.<br>
+        Press any other key to reset.</p>
+        <canvas id="myCanvas" width="300" height="300"></canvas>
+        <script>
+            //variables
+            //  initialize canvas
+            const c = document.getElementById('myCanvas')
+            const ctx = c.getContext('2d')
+            //      position the canvas
+            c.style.left = (window.innerWidth/2)-(window.innerHeight-80)/2+'px'
+            c.style.top = '20px'
+            //      size the canvas
+            c.style.width = window.innerHeight-100+'px'
+            c.style.height = window.innerHeight-100+'px'
+            //  gravity
+            let gravity = 0.1
+            let gravityreact = 0
+            //  score
+            let score = 0
+            //  initialize the block
+            let colPresision = 7
+            let blockx = c.width
+            let maxHeight = 80
+            let minHeight = 80
+            let hole = Math.round(Math.random()*(c.height-100))
+            let holeHeight = 80
+            let block2Height = c.height-hole-holeHeight-20
+            let block2y = hole+holeHeight
+            let firstPress = true
+            let blockWidth = 20
+            //  ball position
+            let vel = {
+                x:40,
+                y:c.height/2
+            }
+            //block function
+            function makeBlock(x,h,hHeight){
+                ctx.fillStyle = '#1c6b0a'
+                ctx.fillRect(x,0,blockWidth,h)
+                ctx.fillRect(x,h+hHeight,blockWidth,c.height-h-hHeight-20)
+            }
+            //bird function
+            function makeBird(x,y){
+                ctx.beginPath()
+                ctx.fillStyle = '#cbff47'
+                ctx.arc(x,y,10,0,Math.PI*2)
+                ctx.fill()
+                ctx.closePath()
+            }
+            //starting page
+            function preface(s){
+                ctx.fillStyle = '#878309'
+                ctx.fillRect(0,0,c.width,c.height)
+                ctx.fillStyle = '#000000'
+                ctx.font = "30px Sans Serif";
+                ctx.textAlign = 'center'
+                ctx.fillText("Flappy Bird", c.width/2, c.height/2);
+                ctx.font = '10px Arial'
+                ctx.fillText(`Score: ${s}`, c.width/2,c.height/2+35)
+            }
+            function animate(){
+                var timer = window.setInterval(function(){
+                    ctx.fillStyle = '#649cf0'
+                    ctx.fillRect(0,0,c.width,c.height)
+                    //ground
+                    ctx.fillStyle = '#21ab15'
+                    ctx.fillRect(0, c.height-20,c.width,20)
+                    //Bird
+                    makeBird(vel.x,vel.y)
+                    //rearange block position
+                    if (blockx<=-blockWidth){
+                        blockx = c.width
+                        hole = Math.round(Math.random()*(c.height-100))
+                    }
+                    if (blockx+blockWidth<=2){
+                        score++
+                    }
+                    //block
+                    makeBlock(blockx,hole,holeHeight)
+                    //moving the block
+                    blockx-=2
+                    //score text
+                    ctx.fillStyle = '#000000'
+                    ctx.font = "10px Sans Serif";
+                    ctx.textAlign = 'center'
+                    ctx.fillText(`Score: ${score}`, c.width-30, 10);
+                    //gravity
+                    vel.y+=gravityreact
+                    gravityreact+=gravity
+                    //make game faster
+                    //colission detection
+                    if ((vel.y+colPresision >= c.height-20)||
+                       (vel.x+colPresision>blockx && vel.x-colPresision<=blockx+blockWidth&&
+                       (vel.y-colPresision<=hole || vel.y+colPresision>hole+holeHeight))) {
+                        firstPress = true
+                        blockx++
+                        clearInterval(timer)
+                        preface(score)
+                    }
+                },10)
+            }
+            function init(){
+                animate()
+                firstPress = false
+                blockx = c.width
+                vel.y = c.height/2
+                score = 0
+                gravityreact = 0
+            }
+            window.addEventListener('keydown',function(e){
+                e = e || window.event
+                // go up 
+                if (vel.y>15&&e.key === ' ') {
+                    gravityreact=-2.5
+                }
+                else if (e.key = 'r'){
+                    init()
+                }
+                else if(firstPress){
+                    init()
+                }
+            })
+            //starting screen
+            preface(score)
+        </script>
+    </body>
+</html>
